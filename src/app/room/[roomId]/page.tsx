@@ -1,20 +1,20 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useWebSocket } from '@/hooks/useWebSocket';
+import { useHeader } from '@/components/HeaderProvider';
 import { JoinForm } from '@/components/JoinForm';
 import { PlayerList } from '@/components/PlayerList';
 import { VoteDeck } from '@/components/VoteDeck';
 import { VotingResults } from '@/components/VotingResults';
-import { RoomControls } from '@/components/RoomControls';
-import { ThemeToggle } from '@/components/ThemeToggle';
 import type { CardValue } from '@/types';
 
 export default function RoomPage() {
   const params = useParams();
   const router = useRouter();
   const roomId = params.roomId as string;
+  const { setTitle, setShowCopyButton, setShowLeaveButton, setOnCopyLink, setOnLeave } = useHeader();
 
   const [playerName, setPlayerName] = useState('');
   const [hasJoined, setHasJoined] = useState(false);
@@ -72,6 +72,23 @@ export default function RoomPage() {
     alert('Ссылка скопирована в буфер обмена!');
   }, []);
 
+  useEffect(() => {
+    setTitle(`Комната ${roomId}`);
+    setShowCopyButton(true);
+    setShowLeaveButton(true);
+    setOnCopyLink(() => handleCopyLink);
+    setOnLeave(() => handleLeave);
+
+    return () => {
+      setTitle('Planning Poker');
+      setShowCopyButton(false);
+      setShowLeaveButton(false);
+      setOnCopyLink(undefined);
+      setOnLeave(undefined);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [roomId]);
+
   const currentUserVote = room?.players.find((p) => p.id === playerId)?.vote || null;
   const hasVoted = currentUserVote !== null;
   const votedPlayers = room?.players.filter((p) => p.vote !== null) ?? [];
@@ -81,9 +98,6 @@ export default function RoomPage() {
   if (!hasJoined) {
     return (
       <main className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-6">
-        <div className="fixed top-6 right-6 z-50">
-          <ThemeToggle />
-        </div>
         <div className="max-w-lg w-full">
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-10">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
@@ -107,9 +121,6 @@ export default function RoomPage() {
   if (!room || !playerId) {
     return (
       <main className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-6">
-        <div className="fixed top-6 right-6 z-50">
-          <ThemeToggle />
-        </div>
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-2 border-gray-200 border-t-[#14b0ff] mx-auto mb-6"></div>
           <p className="text-base text-gray-600 dark:text-gray-400 font-medium">Подключение...</p>
@@ -121,23 +132,6 @@ export default function RoomPage() {
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6 md:p-10">
       <div className="max-w-6xl mx-auto">
-        <header className="mb-8">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
-                <span className="text-sm font-normal text-gray-400 dark:text-gray-500">Комната </span>{roomId}
-              </h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Раунд {room.round} • {room.players.length} участников
-              </p>
-            </div>
-            <RoomControls
-              onCopyLink={handleCopyLink}
-              onLeave={handleLeave}
-            />
-          </div>
-        </header>
-
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div>
             {room.votesRevealed ? (

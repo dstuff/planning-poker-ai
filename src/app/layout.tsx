@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import { ThemeProvider } from '@/components/ThemeProvider';
+import { HeaderProvider } from '@/components/HeaderProvider';
+import { HeaderWrapper } from '@/components/HeaderWrapper';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -15,7 +17,12 @@ export default function RootLayout({
   return (
     <html lang="ru" suppressHydrationWarning>
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <HeaderProvider>
+            <HeaderWrapper />
+            <div className="pt-16">{children}</div>
+          </HeaderProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

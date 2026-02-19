@@ -1,15 +1,25 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { v4 as uuidv4 } from 'uuid';
 import { Button } from '@/components/ui/Button';
-import { ThemeToggle } from '@/components/ThemeToggle';
+import { useHeader } from '@/components/HeaderProvider';
 import { Plus, Loader2 } from 'lucide-react';
 
 export default function NewRoomPage() {
   const router = useRouter();
+  const { setTitle, setShowCopyButton, setShowLeaveButton, setOnCopyLink, setOnLeave } = useHeader();
   const [isCreating, setIsCreating] = useState(false);
+
+  useEffect(() => {
+    setTitle('Новая комната');
+    setShowCopyButton(false);
+    setShowLeaveButton(false);
+    setOnCopyLink(undefined);
+    setOnLeave(undefined);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleCreateRoom = () => {
     setIsCreating(true);
@@ -19,9 +29,6 @@ export default function NewRoomPage() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-6">
-      <div className="fixed top-4 right-4 z-50">
-        <ThemeToggle />
-      </div>
       <div className="max-w-lg w-full">
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-10">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">

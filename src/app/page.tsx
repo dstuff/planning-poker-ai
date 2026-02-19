@@ -1,14 +1,24 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
-import { ThemeToggle } from '@/components/ThemeToggle';
+import { useHeader } from '@/components/HeaderProvider';
 import { Plus } from 'lucide-react';
 
 export default function Home() {
   const router = useRouter();
+  const { setTitle, setShowCopyButton, setShowLeaveButton, setOnCopyLink, setOnLeave } = useHeader();
   const [roomId, setRoomId] = useState('');
+
+  useEffect(() => {
+    setTitle('Planning Poker');
+    setShowCopyButton(false);
+    setShowLeaveButton(false);
+    setOnCopyLink(undefined);
+    setOnLeave(undefined);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleJoinRoom = (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,9 +29,6 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-6">
-      <div className="fixed top-6 right-6 z-50">
-        <ThemeToggle />
-      </div>
       <div className="max-w-lg w-full">
         <div className="text-center mb-12">
           <h1 className="text-5xl font-bold text-gray-900 dark:text-white mb-4 tracking-tight">
