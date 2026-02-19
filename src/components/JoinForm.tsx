@@ -19,9 +19,9 @@ export function JoinForm({ onSubmit, loading = false }: JoinFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-5">
       <div>
-        <label htmlFor="name" className="block text-base font-medium text-gray-700 dark:text-gray-300 mb-3">
+        <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Ваше имя
         </label>
         <input
@@ -30,7 +30,7 @@ export function JoinForm({ onSubmit, loading = false }: JoinFormProps) {
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Введите ваше имя"
-          className="w-full px-5 py-4 text-lg border-2 border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+          className="w-full px-5 py-3.5 text-base border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-[#14b0ff] focus:border-[#14b0ff] outline-none transition-all placeholder:text-gray-400"
           required
           disabled={loading}
         />

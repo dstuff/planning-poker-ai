@@ -80,22 +80,22 @@ export default function RoomPage() {
 
   if (!hasJoined) {
     return (
-      <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-6">
-        <div className="fixed top-4 right-4 z-50">
+      <main className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-6">
+        <div className="fixed top-6 right-6 z-50">
           <ThemeToggle />
         </div>
         <div className="max-w-lg w-full">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-10">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-10">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
               Присоединение к комнате
             </h1>
-            <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">
-              Комната: <span className="font-mono bg-gray-100 dark:bg-gray-700 dark:text-gray-200 px-3 py-1 rounded-lg">{roomId}</span>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+              Комната: <span className="font-mono bg-gray-100 dark:bg-gray-700 dark:text-gray-300 px-2.5 py-1 rounded-lg">{roomId}</span>
             </p>
             <JoinForm onSubmit={handleJoin} loading={!isConnected} />
             {error && (
-              <div className="mt-6 p-4 bg-red-50 border-2 border-red-200 rounded-xl">
-                <p className="text-red-700 text-base font-medium">{error}</p>
+              <div className="mt-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+                <p className="text-red-700 dark:text-red-400 text-sm font-medium">{error}</p>
               </div>
             )}
           </div>
@@ -106,29 +106,29 @@ export default function RoomPage() {
 
   if (!room || !playerId) {
     return (
-      <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-6">
-        <div className="fixed top-4 right-4 z-50">
+      <main className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-6">
+        <div className="fixed top-6 right-6 z-50">
           <ThemeToggle />
         </div>
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-200 border-t-blue-600 mx-auto mb-6"></div>
-          <p className="text-xl text-gray-700 dark:text-gray-300 font-medium">Подключение к комнате...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-2 border-gray-200 border-t-[#14b0ff] mx-auto mb-6"></div>
+          <p className="text-base text-gray-600 dark:text-gray-400 font-medium">Подключение...</p>
         </div>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-6 md:p-10">
-      <div className="max-w-7xl mx-auto">
-        <header className="mb-10">
+    <main className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6 md:p-10">
+      <div className="max-w-6xl mx-auto">
+        <header className="mb-8">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <div>
-              <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-                <span className="text-base font-normal text-gray-400 dark:text-gray-500">Комната {roomId}</span>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
+                <span className="text-sm font-normal text-gray-400 dark:text-gray-500">Комната </span>{roomId}
               </h1>
-              <p className="text-lg text-gray-600 dark:text-gray-300">
-                Раунд {room.round} • Участников: {room.players.length}
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Раунд {room.round} • {room.players.length} участников
               </p>
             </div>
             <RoomControls
@@ -172,7 +172,7 @@ export default function RoomPage() {
         </div>
 
         {error && (
-          <div className="fixed bottom-6 right-6 bg-red-600 text-white px-6 py-4 rounded-xl shadow-lg text-base font-medium">
+          <div className="fixed bottom-6 right-6 bg-red-500 text-white px-5 py-3 rounded-xl shadow-lg text-sm font-medium">
             {error}
           </div>
         )}

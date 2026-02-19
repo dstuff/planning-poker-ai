@@ -2,6 +2,7 @@
 
 import React from 'react';
 import type { Player } from '@/types';
+import { Crown } from 'lucide-react';
 
 interface PlayerListProps {
   players: Player[];
@@ -11,9 +12,11 @@ interface PlayerListProps {
 
 export function PlayerList({ players, currentUserId, votesRevealed }: PlayerListProps) {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
-      <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-6">Участники ({players.length})</h3>
-      <ul className="space-y-3">
+    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+      <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-5">
+        Участники <span className="text-gray-400 font-normal">({players.length})</span>
+      </h3>
+      <ul className="space-y-2">
         {players.map((player) => {
           const isCurrentUser = player.id === currentUserId;
           const hasVoted = player.vote !== null;
@@ -21,42 +24,46 @@ export function PlayerList({ players, currentUserId, votesRevealed }: PlayerList
           return (
             <li
               key={player.id}
-              className={`flex items-center justify-between p-4 rounded-xl ${
+              className={`flex items-center justify-between p-3 rounded-xl transition-colors ${
                 isCurrentUser
-                  ? 'bg-blue-50 dark:bg-blue-900/30 border-2 border-blue-200 dark:border-blue-700'
-                  : 'bg-gray-50 dark:bg-gray-700/50 border-2 border-transparent'
+                  ? 'bg-[#e0f4ff] dark:bg-[#0a3a52] border border-[#14b0ff]/30'
+                  : 'bg-gray-50 dark:bg-gray-700/50 border border-transparent'
               }`}
             >
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
                 <div
-                  className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold ${
+                  className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold ${
                     isCurrentUser
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200'
+                      ? 'bg-[#14b0ff] text-white'
+                      : 'bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300'
                   }`}
                 >
                   {player.name.charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  <span className={`text-base font-medium ${isCurrentUser ? 'text-blue-800 dark:text-blue-300' : 'text-gray-800 dark:text-gray-200'}`}>
-                    {player.id === players[0]?.id && '👑 '}
+                  <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                    {player.id === players[0]?.id && <Crown className="w-4 h-4 inline mr-1 text-yellow-500" />}
                     {player.name}
                     {isCurrentUser && ' (Вы)'}
                   </span>
                   {votesRevealed && hasVoted && (
-                    <span className="ml-3 text-base text-gray-600 dark:text-gray-400">
-                      — карта: <strong className="text-blue-600 dark:text-blue-400">{player.vote}</strong>
+                    <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
+                      — <strong className="text-gray-800 dark:text-gray-200">{player.vote}</strong>
                     </span>
                   )}
                 </div>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 {hasVoted ? (
-                  <span className={`text-base font-semibold ${votesRevealed ? 'text-green-600 dark:text-green-400' : 'text-blue-600 dark:text-blue-400'}`}>
-                    {votesRevealed ? '✓' : 'Проголосовал(а)'}
+                  <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${
+                    votesRevealed
+                      ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
+                      : 'bg-[#e0f4ff] dark:bg-[#0a3a52] text-[#14b0ff]'
+                  }`}>
+                    {votesRevealed ? '✓' : 'Голос'}
                   </span>
                 ) : (
-                  <span className="text-gray-400 dark:text-gray-500 text-base">—</span>
+                  <span className="text-gray-300 dark:text-gray-600 text-sm">—</span>
                 )}
               </div>
             </li>
