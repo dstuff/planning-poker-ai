@@ -1,0 +1,37 @@
+{
+  "name": "wind-planning-poker",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"next dev\"",
+    "build": "next build",
+    "start": "concurrently \"npm run server\" \"next start\"",
+    "lint": "next lint",
+    "server": "npx tsx server/index.ts"
+  },
+  "dependencies": {
+    "@types/node": "^22.10.2",
+    "@types/uuid": "^10.0.0",
+    "@types/ws": "^8.5.13",
+    "next": "14",
+    "react": "^18",
+    "react-dom": "^18",
+    "typescript": "^5",
+    "uuid": "^10.0.0",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.18",
+    "@types/react": "19.2.14",
+    "@typescript-eslint/eslint-plugin": "^8.15.0",
+    "@typescript-eslint/parser": "^8.15.0",
+    "autoprefixer": "^10.4.24",
+    "concurrently": "^9.2.1",
+    "eslint": "^8",
+    "eslint-config-next": "14",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.18",
+    "tsx": "^4.21.0",
+    "typescript-eslint": "^8.15.0"
+  }
+}
