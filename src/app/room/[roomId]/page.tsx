@@ -145,7 +145,7 @@ export default function RoomPage() {
                 deck={room.deck}
                 selectedVote={currentUserVote}
                 onVote={handleVote}
-                disabled={!isConnected || hasVoted}
+                disabled={!isConnected}
                 hasVoted={hasVoted}
                 isHost={isHost}
                 allVoted={allVoted}
