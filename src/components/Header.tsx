@@ -24,7 +24,7 @@ export function Header({
       {showCopyButton && onCopyLink && (
         <button
           onClick={onCopyLink}
-          className="inline-flex items-center justify-center gap-2 px-3 py-2 min-h-[44px] sm:min-h-0 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 transition-all focus:outline-none focus:ring-2 focus:ring-[#14b0ff] sm:w-auto w-[44px]"
+          className="inline-flex items-center justify-center gap-2 px-3 py-2 min-h-[44px] sm:min-h-0 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 transition-all focus:outline-none focus:ring-2 focus:ring-[#14b0ff] sm:w-auto w-[44px] cursor-pointer"
           title="Копировать ссылку"
           aria-label="Копировать ссылку"
         >
@@ -35,7 +35,7 @@ export function Header({
       {showLeaveButton && onLeave && (
         <button
           onClick={onLeave}
-          className="inline-flex items-center justify-center gap-2 px-3 py-2 min-h-[44px] sm:min-h-0 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-all focus:outline-none focus:ring-2 focus:ring-red-400 sm:w-auto w-[44px]"
+          className="inline-flex items-center justify-center gap-2 px-3 py-2 min-h-[44px] sm:min-h-0 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-all focus:outline-none focus:ring-2 focus:ring-red-400 sm:w-auto w-[44px] cursor-pointer"
           title="Выйти из комнаты"
           aria-label="Выйти из комнаты"
         >
