@@ -27,7 +27,7 @@ export function PokerCard({
   };
 
   const getCardContent = () => {
-    if (!value) return '?';
+    if (!value) return '';
     if (!isRevealed && value !== '?') return '?';
     return value;
   };
