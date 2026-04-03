@@ -121,7 +121,7 @@ export default function Home() {
         </div>
 
         <p className="text-center text-sm text-gray-400 dark:text-gray-500 mt-8 font-light">
-          Real-time Planning Poker для Agile команд
+          Made with ❤️ by Andrey Safonov
         </p>
       </div>
     </main>

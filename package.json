@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "concurrently \"npm run server\" \"next dev\"",
+    "dev": "concurrently \"npm run server\" \"next dev --port 4000\"",
     "build": "next build",
     "start": "concurrently \"npm run server\" \"next start\"",
     "lint": "next lint",
