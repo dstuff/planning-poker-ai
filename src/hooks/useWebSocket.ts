@@ -13,6 +13,13 @@ interface UseWebSocketOptions {
   onError?: (message: string) => void;
 }
 
+const RECONNECT_DELAYS_MS = [500, 1000, 2000, 5000];
+
+interface JoinedRoom {
+  roomId: string;
+  playerName: string;
+}
+
 function getWebSocketUrl(): string {
   if (typeof window === 'undefined') {
     return 'ws://localhost:8080';
@@ -29,18 +36,42 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
   const [playerId, setPlayerId] = useState<string | null>(null);
   const [room, setRoom] = useState<SerializedRoom | null>(null);
   const connectionErrorRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const reconnectAttemptsRef = useRef(0);
+  const shouldReconnectRef = useRef(true);
+  const lastJoinedRoomRef = useRef<JoinedRoom | null>(null);
 
-  const sendMessage = useCallback((message: ClientMessage) => {
-    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify(message));
+  const clearConnectionErrorTimeout = useCallback(() => {
+    if (connectionErrorRef.current) {
+      clearTimeout(connectionErrorRef.current);
+      connectionErrorRef.current = null;
     }
   }, []);
 
+  const clearReconnectTimeout = useCallback(() => {
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current);
+      reconnectTimeoutRef.current = null;
+    }
+  }, []);
+
+  const sendMessage = useCallback((message: ClientMessage): boolean => {
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify(message));
+      return true;
+    }
+
+    return false;
+  }, []);
+
   const joinRoom = useCallback((roomId: string, playerName: string) => {
+    lastJoinedRoomRef.current = { roomId, playerName };
     sendMessage({ type: 'JOIN_ROOM', roomId, playerName });
   }, [sendMessage]);
 
   const leaveRoom = useCallback((roomId: string, playerId: string) => {
+    shouldReconnectRef.current = false;
+    lastJoinedRoomRef.current = null;
     sendMessage({ type: 'LEAVE_ROOM', roomId, playerId });
   }, [sendMessage]);
 
@@ -63,83 +94,111 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
   }, [options]);
 
   useEffect(() => {
-    const wsUrl = getWebSocketUrl();
-    const ws = new WebSocket(wsUrl);
-    wsRef.current = ws;
+    shouldReconnectRef.current = true;
 
-    // Показываем ошибку только если подключение не удалось через 2 секунды
-    connectionErrorRef.current = setTimeout(() => {
-      if (ws.readyState !== WebSocket.OPEN) {
-        optionsRef.current.onError?.('Не удалось подключиться к серверу. Убедитесь, что сервер запущен.');
-      }
-    }, 2000);
+    const connect = () => {
+      clearReconnectTimeout();
+      clearConnectionErrorTimeout();
 
-    ws.onopen = () => {
-      console.log('WebSocket connected');
-      setIsConnected(true);
-      if (connectionErrorRef.current) {
-        clearTimeout(connectionErrorRef.current);
-      }
-    };
+      const wsUrl = getWebSocketUrl();
+      const ws = new WebSocket(wsUrl);
+      wsRef.current = ws;
 
-    ws.onclose = () => {
-      console.log('WebSocket disconnected');
-      setIsConnected(false);
-    };
-
-    ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
-    };
-
-    ws.onmessage = (event) => {
-      try {
-        const message = JSON.parse(event.data) as ServerMessage;
-
-        switch (message.type) {
-          case 'ROOM_STATE':
-            setRoom(message.room);
-            setPlayerId(message.playerId);
-            optionsRef.current.onRoomState?.(message.room, message.playerId);
-            break;
-          case 'PLAYER_JOINED':
-            setRoom(message.room);
-            optionsRef.current.onPlayerJoined?.(message.room, message.player);
-            break;
-          case 'PLAYER_LEFT':
-            setRoom(message.room);
-            optionsRef.current.onPlayerLeft?.(message.room, message.playerId);
-            break;
-          case 'VOTE_CAST':
-            setRoom(message.room);
-            optionsRef.current.onVoteCast?.(message.room, message.playerId);
-            break;
-          case 'VOTES_REVEALED':
-            setRoom(message.room);
-            optionsRef.current.onVotesRevealed?.(message.room);
-            break;
-          case 'NEW_ROUND_STARTED':
-            setRoom(message.room);
-            optionsRef.current.onNewRound?.(message.room);
-            break;
-          case 'ERROR':
-            optionsRef.current.onError?.(message.message);
-            break;
+      // Показываем ошибку только если подключение не удалось через 2 секунды
+      connectionErrorRef.current = setTimeout(() => {
+        if (wsRef.current === ws && ws.readyState !== WebSocket.OPEN) {
+          optionsRef.current.onError?.('Не удалось подключиться к серверу. Убедитесь, что сервер запущен.');
         }
-      } catch (error) {
-        console.error('Error parsing message:', error);
-        optionsRef.current.onError?.('Ошибка обработки сообщения');
-      }
+      }, 2000);
+
+      ws.onopen = () => {
+        if (wsRef.current !== ws) return;
+
+        console.log('WebSocket connected');
+        setIsConnected(true);
+        reconnectAttemptsRef.current = 0;
+        clearConnectionErrorTimeout();
+
+        const lastJoinedRoom = lastJoinedRoomRef.current;
+        if (lastJoinedRoom) {
+          ws.send(JSON.stringify({ type: 'JOIN_ROOM', ...lastJoinedRoom } satisfies ClientMessage));
+        }
+      };
+
+      ws.onclose = () => {
+        if (wsRef.current !== ws) return;
+
+        console.log('WebSocket disconnected');
+        setIsConnected(false);
+        wsRef.current = null;
+        clearConnectionErrorTimeout();
+
+        if (!shouldReconnectRef.current) return;
+
+        const delay = RECONNECT_DELAYS_MS[Math.min(reconnectAttemptsRef.current, RECONNECT_DELAYS_MS.length - 1)];
+        reconnectAttemptsRef.current += 1;
+        reconnectTimeoutRef.current = setTimeout(connect, delay);
+      };
+
+      ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const message = JSON.parse(event.data) as ServerMessage;
+
+          switch (message.type) {
+            case 'ROOM_STATE':
+              setRoom(message.room);
+              setPlayerId(message.playerId);
+              optionsRef.current.onRoomState?.(message.room, message.playerId);
+              break;
+            case 'PLAYER_JOINED':
+              setRoom(message.room);
+              optionsRef.current.onPlayerJoined?.(message.room, message.player);
+              break;
+            case 'PLAYER_LEFT':
+              setRoom(message.room);
+              optionsRef.current.onPlayerLeft?.(message.room, message.playerId);
+              break;
+            case 'VOTE_CAST':
+              setRoom(message.room);
+              optionsRef.current.onVoteCast?.(message.room, message.playerId);
+              break;
+            case 'VOTES_REVEALED':
+              setRoom(message.room);
+              optionsRef.current.onVotesRevealed?.(message.room);
+              break;
+            case 'NEW_ROUND_STARTED':
+              setRoom(message.room);
+              optionsRef.current.onNewRound?.(message.room);
+              break;
+            case 'ERROR':
+              optionsRef.current.onError?.(message.message);
+              break;
+          }
+        } catch (error) {
+          console.error('Error parsing message:', error);
+          optionsRef.current.onError?.('Ошибка обработки сообщения');
+        }
+      };
     };
+
+    connect();
 
     return () => {
-      if (connectionErrorRef.current) {
-        clearTimeout(connectionErrorRef.current);
-      }
-      if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
+      shouldReconnectRef.current = false;
+      clearConnectionErrorTimeout();
+      clearReconnectTimeout();
+
+      const ws = wsRef.current;
+      wsRef.current = null;
+      if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) {
         ws.close();
       }
     };
-  }, []);
+  }, [clearConnectionErrorTimeout, clearReconnectTimeout]);
 
   return {
     isConnected,

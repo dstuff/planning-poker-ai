@@ -11,12 +11,14 @@ import type {
 
 const rooms = new Map<string, Room>();
 const PORT = process.env.WS_PORT || 8080;
+const HEARTBEAT_INTERVAL_MS = 30000;
 
 const DEFAULT_DECK: CardValue[] = ['0', '1', '2', '3', '5', '8', '13', '21', '34', '55', '89', 'A', '?', '☕'];
 
 interface ExtendedWebSocket extends WebSocket {
   playerId?: string;
   roomId?: string;
+  isAlive?: boolean;
 }
 
 function serializeRoom(room: Room): SerializedRoom {
@@ -185,6 +187,11 @@ function handleMessage(ws: ExtendedWebSocket, data: string) {
 
 function handleConnection(ws: ExtendedWebSocket) {
   console.log('New client connected');
+  ws.isAlive = true;
+
+  ws.on('pong', () => {
+    ws.isAlive = true;
+  });
 
   ws.on('message', (data) => {
     try {
@@ -214,6 +221,24 @@ function handleConnection(ws: ExtendedWebSocket) {
 const wss = new WebSocketServer({ port: Number(PORT) });
 
 wss.on('connection', handleConnection);
+
+const heartbeatInterval = setInterval(() => {
+  wss.clients.forEach((client) => {
+    const ws = client as ExtendedWebSocket;
+
+    if (!ws.isAlive) {
+      ws.terminate();
+      return;
+    }
+
+    ws.isAlive = false;
+    ws.ping();
+  });
+}, HEARTBEAT_INTERVAL_MS);
+
+wss.on('close', () => {
+  clearInterval(heartbeatInterval);
+});
 
 console.log(`WebSocket server running on port ${PORT}`);
 
